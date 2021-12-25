@@ -1,7 +1,5 @@
- 
-//   const  fetch = require('node-fetch');
 import fetch from 'node-fetch';
-// import fetch from 'node-fetch'
+
 let host="http://localhost:3000";
 let username = 'BankinUser';
 let password = '12345678';
@@ -48,6 +46,7 @@ async function  getAccounts(AccesToken){
             headers: {'Content-Type': 'application/json' , 'Authorization' : 'Bearer '+AccesToken}           
        });
        const data = await response.json();
+
        return data;
 }
 
@@ -66,7 +65,16 @@ async function  getTransactions(acc_number, AccesToken ){
 
 let access_token= await getAccesToken();
 let Accounts = await getAccounts(access_token);
-let Accounts = await getTransactions('',access_token);
+let Transactions = await getTransactions( '000000001',access_token);
 
-console.log(access_token);
-console.log(Accounts);
+
+let account;
+for (let index = 0; index < Accounts.account.length; index++) {
+     account = Accounts.account[index];
+    let Transactions = await getTransactions( account.acc_number ,access_token);
+
+    Accounts.account[index]['transactions'] =Transactions.transactions.map( ({label, amount, currency}) => ({label, amount, currency}) );  
+}
+
+let Results = Accounts.account.map( ({acc_number, amount, transactions}) => ({acc_number, amount, transactions}) );
+console.log(  JSON.stringify(Results, null, 4)  )
